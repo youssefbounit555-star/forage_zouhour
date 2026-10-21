@@ -1,0 +1,150 @@
+{
+  "format": "forage-zouhour-backup",
+  "version": 1,
+  "created_at": "2026-10-17T12:00:00.000Z",
+  "tables": {
+    "users": [],
+    "products": [
+      {
+        "id": "prod-tube-steel-100",
+        "name": "Tube acier galvanisé 100 mm",
+        "reference": "TAG-100-6",
+        "width": 0.1,
+        "length_meters": 6.0,
+        "length_unit": "meter",
+        "thickness": 3.0,
+        "manufactured": 0,
+        "kind": "standard",
+        "diameter": null,
+        "hose_unit": "piece",
+        "meters_per_piece": null,
+        "initial_stock": 42,
+        "initial_depot_id": "general-depot",
+        "material_type": "steel",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      },
+      {
+        "id": "prod-sheet-steel-2mm",
+        "name": "Tôle acier 2 mm",
+        "reference": "TOL-2000-1000-2",
+        "width": 1.0,
+        "length_meters": 2.0,
+        "length_unit": "meter",
+        "thickness": 2.0,
+        "manufactured": 0,
+        "kind": "standard",
+        "diameter": null,
+        "hose_unit": "piece",
+        "meters_per_piece": null,
+        "initial_stock": 28,
+        "initial_depot_id": "general-depot",
+        "material_type": "steel",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      },
+      {
+        "id": "prod-pvc-hose-50",
+        "name": "Tuyau PVC 50 mm",
+        "reference": "PVC-50-100",
+        "width": 0.05,
+        "length_meters": 100.0,
+        "length_unit": "meter",
+        "thickness": 4.0,
+        "manufactured": 0,
+        "kind": "hose",
+        "diameter": null,
+        "hose_unit": "meter",
+        "meters_per_piece": null,
+        "initial_stock": 8,
+        "initial_depot_id": "depot-nord",
+        "material_type": "pvc",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      },
+      {
+        "id": "prod-drill-16",
+        "name": "Foret professionnel 16 mm",
+        "reference": "FOR-16-HSS",
+        "width": 0.016,
+        "length_meters": 0.16,
+        "length_unit": "centimeter",
+        "thickness": 0.0,
+        "manufactured": 0,
+        "kind": "diameter",
+        "diameter": 16.0,
+        "hose_unit": "piece",
+        "meters_per_piece": null,
+        "initial_stock": 15,
+        "initial_depot_id": "depot-nord",
+        "material_type": "steel",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      },
+      {
+        "id": "prod-frame-made",
+        "name": "Cadre métallique fabriqué",
+        "reference": "CAD-120-80",
+        "width": 0.8,
+        "length_meters": 1.2,
+        "length_unit": "meter",
+        "thickness": 2.0,
+        "manufactured": 1,
+        "kind": "manufactured",
+        "diameter": null,
+        "hose_unit": "piece",
+        "meters_per_piece": null,
+        "initial_stock": 12,
+        "initial_depot_id": "general-depot",
+        "material_type": "steel",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      }
+    ],
+    "categories": [
+      {
+        "id": "cat-tubes",
+        "name": "Tubes et profilés",
+        "product_ids": "[\"prod-tube-steel-100\"]",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      },
+      {
+        "id": "cat-sheets",
+        "name": "Tôles métalliques",
+        "product_ids": "[\"prod-sheet-steel-2mm\"]",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      }
+    ],
+    "machines": [],
+    "operations": [],
+    "stock_additions": [],
+    "suppliers": [
+      {
+        "id": "supplier-atlas",
+        "name": "Karim Tahiri",
+        "company": "Atlas Métal",
+        "contact": "+212 6 12 34 56 78",
+        "images": "[]"
+      }
+    ],
+    "clients": [
+      {
+        "id": "client-chantier",
+        "name": "Nadia Alaoui",
+        "company": "Chantier Al Amal",
+        "phone": "+212 6 98 76 54 32",
+        "ice": "002345678000012",
+        "images": "[]"
+      }
+    ],
+    "sales": [],
+    "operator_payments": [],
+    "depots": [
+      {
+        "id": "general-depot",
+        "name": "Stock général",
+        "image": null
+      },
+      {
+        "id": "depot-nord",
+        "name": "Dépôt Nord",
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLZ4QAAAABJRU5ErkJggg=="
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+RAPPORT DE CONTROLE SECURITE — FORAGE ZOUHOUR
+Date : 2026-10-21
+Portee : application Flutter locale, code source principal, configuration Android et dependances declarees.
+
+RESUME
+Le controle statique final ne montre ni secret applicatif code en dur, ni requete SQL construite a partir d'une entree utilisateur, ni permission reseau active dans la configuration Android principale. L'application applique plusieurs protections importantes pour un logiciel local : hachage lent des mots de passe, verrouillage apres echecs, chiffrement authentifie des sauvegardes, interdiction de la sauvegarde Android et protection des apercus/captures Android.
+
+Deux risques restent a traiter avant d'utiliser l'application avec des donnees tres sensibles : la base SQLite locale n'est pas chiffree et la suppression d'un depot depuis le mode developpeur peut rendre un stock existant inaccessible dans l'interface.
+
+FICHE DES CONTROLES REALISES
+
+1) Analyse statique Dart/Flutter
+Commande executee : flutter analyze
+Methode : analyseur officiel Flutter/Dart sur le projet.
+Resultat : termine sans erreur bloquante signalee par la commande.
+Ce que ce test controle : erreurs de types, erreurs de syntaxe, API incorrectes et regles de lint actives.
+Limite : ce test ne prouve pas a lui seul la securite fonctionnelle de toutes les actions utilisateur.
+
+2) Tests automatises
+Commande executee : flutter test
+Methode : execution des tests situes dans test/widget_test.dart avec une base SQLite temporaire.
+Resultat : termine sans echec signale par la commande.
+Controles effectivement couverts par les tests :
+- creation du premier administrateur ;
+- absence de compte administrateur par defaut ;
+- hachage du mot de passe et authentification ;
+- refus d'un mot de passe incorrect ;
+- changement de mot de passe ;
+- verrouillage apres echecs repetes ;
+- remise a zero sans recreation d'un compte par defaut ;
+- calcul de poids.
+
+3) Compilation Android de controle
+Commande executee : flutter build apk --debug
+Methode : compilation d'un APK de debogage local.
+Resultat : termine sans echec signale par la commande.
+Ce que ce test controle : integration de Dart, des plugins Android et de la configuration Gradle pour une compilation debug.
+Limite : ce n'est pas un test manuel sur appareil ni une verification de la signature release.
+
+4) Recherche de secrets et de cles codees en dur
+Commande executee : rg -n -i --glob '!build/**' --glob '!*.lock' 'AIza|AKIA|sk-|ghp_|BEGIN PRIVATE' .
+Methode : recherche de prefixes courants de cles API, AWS, GitHub et de cles privees dans les sources.
+Resultat : aucun secret de ce type trouve. Le seul resultat etait un commentaire Kotlin contenant le mot anglais "credentials", pas une cle.
+Limite : une recherche par motifs ne remplace pas un detecteur de secrets connecte a une base de signatures.
+
+5) Revue de l'authentification et des mots de passe
+Fichiers controles : lib/main.dart, notamment PasswordSecurity et CredentialSecurity.
+Methode : lecture du code de creation, verification et stockage des comptes.
+Resultat :
+- les mots de passe sont derives avec PBKDF2-HMAC-SHA-256, 600000 iterations et un sel aleatoire de 16 octets ;
+- la comparaison du resultat est faite en temps constant ;
+- le calcul couteux est execute hors de l'isolate UI ;
+- les tentatives de connexion sont limitees et le compte est temporairement verrouille apres echecs repetes ;
+- aucun mot de passe administrateur par defaut n'est cree.
+Evaluation : conforme pour une application locale, sous reserve de la limite sur le chiffrement de la base indiquee dans les constats.
+
+6) Revue du chiffrement des sauvegardes
+Fichier controle : lib/main.dart, PasswordSecurity.
+Methode : lecture du format de chiffrement et de la derivation de cle.
+Resultat : les sauvegardes sont chiffrees avec AES-GCM-256, un nonce aleatoire, un sel aleatoire et PBKDF2-HMAC-SHA-256 a 310000 iterations. AES-GCM apporte egalement une verification d'integrite (MAC).
+Evaluation : bonne protection pour les sauvegardes protegees par une phrase de passe solide.
+
+7) Revue des acces SQL et des entrees utilisateur
+Fichier controle : lib/main.dart.
+Methode : recherche de rawQuery/rawInsert/rawUpdate/rawDelete, lecture des requetes et des clauses where.
+Resultat : une seule requete rawQuery a ete relevee pour un agregat de stock. Les valeurs dynamiques utilisees dans les clauses SQL passent par des placeholders et whereArgs. Aucune interpolation directe d'une entree utilisateur dans une requete SQL n'a ete identifiee.
+Evaluation : aucune injection SQL evidente relevee pendant ce controle statique.
+
+8) Revue de la configuration Android
+Fichiers controles : android/app/src/main/AndroidManifest.xml, MainActivity.kt et android/app/build.gradle.kts.
+Methode : lecture des permissions, options de sauvegarde, reseau et signature.
+Resultat :
+- seule la permission POST_NOTIFICATIONS est demandee par le manifeste principal ;
+- INTERNET et les permissions larges de stockage sont retirees du manifeste principal ;
+- android:allowBackup=false et android:fullBackupContent=false ;
+- android:usesCleartextTraffic=false ;
+- FLAG_SECURE empeche les captures d'ecran et les apercus dans le selecteur de taches Android ;
+- une construction release echoue si les informations de signature protegee ne sont pas fournies depuis un fichier externe au projet ;
+- le minification et la reduction des ressources sont activees pour release.
+Note : les manifestes debug/profile declarent INTERNET pour le developpement. Ce n'est pas la configuration principale de production ; verifier le manifeste fusionne avant toute publication release.
+
+9) Controle des dependances
+Commandes executees : flutter pub outdated ; lecture de pubspec.yaml et pubspec.lock.
+Resultat : les dependances declarees ont ete inventoriees (cryptography, sqflite, image_picker, file_picker, printing, pdf et flutter_local_notifications notamment). La sortie de la verification distante des versions n'a pas ete exploitable dans cet environnement ; aucun verdict CVE ne peut donc etre affirme ici.
+Recommandation : executer dans une CI ayant acces a Internet un audit SCA/CVE (Dependabot, OSV-Scanner ou outil equivalent) a chaque mise a jour de pubspec.lock.
+
+CONSTATS ET RECOMMANDATIONS
+
+[IMPORTANT — a traiter selon la sensibilite des donnees]
+Base SQLite locale non chiffree.
+Emplacement : ouverture de base dans lib/main.dart (openDatabase).
+Risque : une personne ayant acces au fichier de base sur l'appareil ou a une copie du stockage local peut lire les donnees metier et les hashes de mots de passe. Le hachage protege le mot de passe en clair, mais pas les autres donnees.
+Action recommandee : definir le modele de menace. Si le telephone/ordinateur peut etre perdu, partage ou compromis, utiliser une base chiffree (par exemple SQLCipher) et conserver la cle via le magasin securise de la plateforme. Conserver des sauvegardes chiffrees avec une phrase de passe forte.
+
+[IMPORTANT — integrite des donnees]
+Suppression d'un depot depuis le mode developpeur sans verification des references.
+Emplacement : deleteDepot dans lib/main.dart.
+Risque : les achats, ventes, transferts ou operations peuvent encore referencer le depot supprime. Comme le calcul de stock parcourt les depots existants, ce stock risque de ne plus apparaitre dans l'interface.
+Action recommandee : realiser la suppression dans une transaction qui refuse l'action si des references existent, ou demander un depot de remplacement et migrer toutes les references avant suppression.
+
+[BONNES PRATIQUES A CONSERVER]
+- Ne jamais ajouter de mot de passe, cle API, keystore ou fichier de signature au depot Git.
+- Maintenir les controles d'autorisation cote interface et limiter l'acces physique au stockage de l'appareil.
+- Verifier le manifeste fusionne et la signature avant chaque publication release.
+- Ajouter des tests automatises pour les trois etapes de fin d'operation (produit fini, pieces restantes, dechets), les annulations de validation et la migration de base version 31.
+
+LIMITES DU CONTROLE
+Ce rapport est une revue statique et des tests locaux ; il ne remplace pas un test d'intrusion sur appareil, une revue du manifeste fusionne release, un audit de vulnerabilites CVE en ligne, ni une analyse de l'environnement de deploiement. Aucune donnee utilisateur reelle ni aucun secret n'a ete affiche dans ce rapport.
