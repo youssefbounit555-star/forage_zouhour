@@ -29,20 +29,30 @@ jobs:
         working-directory: ios
 
       - name: Build iOS without code signing
-        run: flutter build ios --release --no-codesign
+        run: |
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/ios/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
 
       - name: Package unsigned IPA
         shell: bash
         run: |
-          set -e
-          mkdir -p Payload
-          cp -R build/ios/iphoneos/Runner.app Payload/
-          /usr/bin/zip -r -q FORAGE_ZOUHOUR_unsigned.ipa Payload
+          mkdir -p build/ios/iphoneos/Payload
+          cp -R build/ios/DerivedData/Build/Products/Release-iphoneos/Runner.app \
+            build/ios/iphoneos/Payload/Runner.app
+          cd build/ios/iphoneos
+          zip -r Forage-Zouhour-unsigned.ipa Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FORAGE-ZOUHOUR-unsigned-IPA
-          path: FORAGE_ZOUHOUR_unsigned.ipa
-          if-no-files-found: error
-          retention-days: 7
+          name: Forage-Zouhour-iOS
+          path: build/ios/iphoneos/Forage-Zouhour-unsigned.ipa
